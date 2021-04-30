@@ -2,6 +2,7 @@
 // Article BlazorSpread
 // ******************************
 using BlazorCosmosDB.Shared;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -13,13 +14,22 @@ namespace BlazorCosmosDB.Server.Services
     {
         public static async Task<List<T>> GetDataSample<T>(ICosmosService<T> _service)
         {
+            
             var file = $"{Startup.PATH}/Statics/{typeof(T).Name}_SEED.json";
             if (File.Exists(file)) {
-                var data = JsonSerializer.Deserialize<List<T>>(File.ReadAllText(file));
-                foreach (T item in data) {
-                    await _service.AddItemAsync(item);
+                try
+                {
+                    var data = JsonSerializer.Deserialize<List<T>>(File.ReadAllText(file));
+                    foreach (T item in data)
+                    {
+                        await _service.AddItemAsync(item);
+                    }
+                    return data;
                 }
-                return data;
+                catch(Exception ex)
+                {
+
+                }
             }
             return new List<T>();
         }

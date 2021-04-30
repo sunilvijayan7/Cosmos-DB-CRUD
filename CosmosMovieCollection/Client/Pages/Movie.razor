@@ -1,4 +1,4 @@
-﻿@page "/Movies"
+﻿@page "/Movie"
 @inject HttpClient _http
 @inject NavigationManager _navigation
 @inject IJSRuntime _jsRuntime
@@ -7,7 +7,7 @@
 <hr />
 <p>A collection of Movies  fetched from a Cosmos DB database</p>
 <div>
-    <a href="MoviesEditor" style="font-size:16px;"><i class="oi oi-book"></i> Add Movie</a>
+    <a href="MovieEditor" style="font-size:16px;"><i class="oi oi-book"></i> Add Movie</a>
 </div>
 @if (items == null) {
     <h6>@echo</h6>
@@ -29,7 +29,7 @@ else {
                 <tr>
                     <td>@b.Title</td>
                     <td>@b.Director</td>
-                    <td>@b.Language</td>
+                    @*<td>@b.Language</td>*@
                     <td>@b.Year</td>
                     <td>
                         <span style="@LinkStyle(b.Link);"

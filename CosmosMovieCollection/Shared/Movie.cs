@@ -17,8 +17,8 @@ namespace BlazorCosmosDB.Shared
         [JsonPropertyName("director")]
         public string Director{ get; set; }
 
-        [JsonPropertyName("language")]
-        public string Language { get; set; }
+        //[JsonPropertyName("language")]
+        //public string Language { get; set; }
 
         [JsonPropertyName("posterUrl")]
         public string Link { get; set; }
@@ -27,19 +27,19 @@ namespace BlazorCosmosDB.Shared
         public string Title { get; set; }
 
         [JsonPropertyName("year")]
-        public int Year { get; set; }
+        public string Year { get; set; }
 
         [JsonPropertyName("runtime")]
-        public int Runtime { get; set; }
+        public string Runtime { get; set; }
 
         [JsonPropertyName("plot")]
-        public int Plot { get; set; }
+        public string Plot { get; set; }
 
         [JsonPropertyName("genres")]
-        public int Genres { get; set; }
+        public string Genres { get; set; }
 
         [JsonPropertyName("actors")]
-        public int Actors { get; set; }
+        public string Actors { get; set; }
         
         // ** PartitionKey: automated setting the server country 
         public string Partition { get; set; }
