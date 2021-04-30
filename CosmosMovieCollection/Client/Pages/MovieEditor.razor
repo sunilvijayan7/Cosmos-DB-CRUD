@@ -1,0 +1,110 @@
+﻿@page "/MovieEditor"
+@page "/MovieEditor/{id}/{partition}"
+@inject NavigationManager _navigation
+@inject HttpClient _http
+@inject IJSRuntime _jr;
+
+<h3 style="color:darkgoldenrod">Book Editor</h3>
+<hr />
+<div spellcheck="false">
+    <table class="table table-borderless">
+        <tr>
+            <td class="td-label">Id</td>
+            <td>
+                <input class="form-control" type="text" maxlength="14"
+                       readonly="readonly"
+                       @bind="item.ISBN" placeholder="Leave empty for random" />
+            </td>
+        </tr>
+        <tr>
+            <td class="td-label">Title</td>
+            <td>
+                <input class="form-control" type="text" maxlength="200"
+                       @bind="item.Title" />
+            </td>
+        </tr>
+        <tr>
+            <td class="td-label">Director</td>
+            <td>
+                <input class="form-control" type="text" maxlength="50"
+                       @bind="item.Director" />
+            </td>
+        </tr>
+        <tr>
+            <td class="td-label">Language</td>
+            <td>
+                <input class="form-control" type="text" maxlength="20"
+                       @bind="item.Language" placeholder="Set the book language" />
+            </td>
+        </tr>
+        <tr>
+            <td class="td-label">Year</td>
+            <td>
+                <input class="form-control" type="number" 
+                       min="-2000" max="@DateTime.Today.Year"
+                       @bind="item.Year" />
+            </td>
+        </tr>
+        <tr>
+            <td class="td-label">Link</td>
+            <td>
+                <input class="form-control" type="text" maxlength="200"
+                       @bind="item.Link" placeholder="Link" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <br />
+                <input class="btn btn-primary" 
+                       type="button" value="Update" 
+                       @onclick="Save" />
+                <input class="btn btn-danger" 
+                       type="button" value="Cancel" 
+                       @onclick="Cancel" />
+            </td>
+        </tr>
+    </table>
+</div>
+<hr />
+<h5>@echo</h5>
+
+@code {
+    [Parameter] public string id { get; set; }
+    [Parameter] public string partition { get; set; }
+
+        BlazorCosmosDB.Shared.Movie item = new BlazorCosmosDB.Shared.Movie();
+    string echo;
+
+    bool isEdit => !string.IsNullOrEmpty(id);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (isEdit) {// update, PUT operation
+                item = await _http.GetFromJsonAsync<BlazorCosmosDB.Shared.Movie>($"api/movie/{id}/{partition}");
+        }
+        else {
+            item.ISBN = Utils.NewISBN();
+        }
+        echo = "READY";
+    }
+
+    protected async Task Save()
+    {
+        HttpResponseMessage response;
+        if (isEdit) {
+            response = await _http.PutAsJsonAsync($"api/movie/{id}", item);
+        }
+        else {
+            response = await _http.PostAsJsonAsync($"api/movie/", item);
+        }
+        if (await Utils.ResponseResult(response) == true) {
+            _navigation.NavigateTo("/Movie");
+        }
+        else {
+            echo = "The operation was not completed";
+        }
+    }
+
+    protected void Cancel() => _navigation.NavigateTo("/Movie");
+
+}

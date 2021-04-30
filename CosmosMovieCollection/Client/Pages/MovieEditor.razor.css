@@ -1,0 +1,12 @@
+﻿:focus {
+    outline: none;
+}
+
+.td-label {
+    width: 90px;
+    vertical-align: middle;
+}
+
+.btn {
+    width: 130px;
+}

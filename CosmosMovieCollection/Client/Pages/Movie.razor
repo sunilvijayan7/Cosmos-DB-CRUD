@@ -1,0 +1,119 @@
+﻿@page "/Movies"
+@inject HttpClient _http
+@inject NavigationManager _navigation
+@inject IJSRuntime _jsRuntime
+
+<h3 style="color:darkgoldenrod">Movies Collection</h3>
+<hr />
+<p>A collection of Movies  fetched from a Cosmos DB database</p>
+<div>
+    <a href="MoviesEditor" style="font-size:16px;"><i class="oi oi-book"></i> Add Movie</a>
+</div>
+@if (items == null) {
+    <h6>@echo</h6>
+}
+else {
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <td>Title</td>
+                <td>Director</td>
+                <td>Language</td>
+                <td>Year</td>
+                <td>Link</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in items) {
+                <tr>
+                    <td>@b.Title</td>
+                    <td>@b.Director</td>
+                    <td>@b.Language</td>
+                    <td>@b.Year</td>
+                    <td>
+                        <span style="@LinkStyle(b.Link);"
+                              @onclick="() => OpenLink(b.Link)">More...</span>
+                    </td>
+                    <td nowrap>
+                        <span style="cursor:pointer;color:goldenrod"
+                              @onclick="@(e => OnEdit(b.ISBN, b.Partition))" 
+                              class="oi oi-pencil"></span>
+                        <span style="cursor:pointer;color:salmon"
+                              @onclick="@(e => OnDelete(b.ISBN))" 
+                              class="oi oi-trash"></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    if (items.Count == 0) {
+        <h5>
+            <a href="#"
+               @onclick="@SeedData"
+               @onclick:preventDefault="true">
+                <i class="oi oi-data-transfer-upload" aria-hidden="true"></i> Load Movies
+            </a>
+        </h5>
+    }
+}
+<br />
+
+@code {
+    List<BlazorCosmosDB.Shared.Movie> items;
+    string apiRoot = "api/movie/";
+    string echo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        echo = "Queryinhg database...";
+        try {
+            var data = await _http.GetFromJsonAsync<List<BlazorCosmosDB.Shared.Movie>>(apiRoot);
+            items = data.OrderBy(_ => _.Title).ToList();
+        }
+        catch (Exception exception) {
+            echo = "Exception: " + exception.Message;
+        }
+    }
+
+    void OnEdit(string id, string partition)
+    {
+        _navigation.NavigateTo($"MovieEditor/{id}/{partition}");
+    }
+
+    void OnCreate()
+    {
+        _navigation.NavigateTo($"MovieEditor/");
+    }
+
+    async Task OnDelete(string id)
+    {
+        items.Remove(items.Find(x => x.ISBN == id));
+        // update database
+        await _http.DeleteAsync($"api/movie/{id}");
+    }
+
+    async Task OpenLink(string link)
+    {
+        if (string.IsNullOrEmpty(link) == false) {
+            await _jsRuntime.InvokeVoidAsync("open", link, "_blank");
+        }
+    }
+
+    string LinkStyle(string link)
+    {
+        if (string.IsNullOrEmpty(link)) return "gray;";
+        return "cursor:pointer;color:darkgoldenrod;";
+    }
+
+    async Task SeedData()
+    {
+        echo = "Seeding database.collection...";
+        try {
+                items = await _http.GetFromJsonAsync<List<BlazorCosmosDB.Shared.Movie>>(apiRoot + "SeedData");
+        }
+        catch (Exception exception) {
+            echo = "Exception: " + exception.Message;
+        }
+    }
+}
